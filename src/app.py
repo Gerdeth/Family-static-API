@@ -37,31 +37,27 @@ def get_all_members():
     # }
     # return jsonify(response_body), 200
     response = jackson_family.get_all_members()
-    if  response is None or len(response) < 1: 
+    if  response is None : 
       raise APIException("Record is not found", status_code=500)
 
-    return jsonify({"family": jackson_family.get_all_members()}), 200
+    return jsonify({"family": response}), 200
 
 
 @app.route('/members/<int:id>', methods=['GET'])
 def get_member(id):
 
-    response = jackson_family.get_all_members()
-    for member in response:
-     if id == member["id"]:
-      raise APIException("Bad request", status_code=400)
-
-    if  response is None or len(response) < 1: 
-      raise APIException("Record is not found", status_code=500)
-    
-    return jsonify({"family": jackson_family.get_member(id)}), 200    
+    response = jackson_family.get_member(id)
+    if response == None :
+      raise APIException("Member not found", status_code=400)
+    return jsonify({"family":response}), 200    
 
  
 
 @app.route('/members', methods=['POST'])
 def add_member():
-
-    jackson_family.add_member(request.get_json())
+    request_data=request.get_json()
+    request_data["id"]=jackson_family._generateId()
+    jackson_family.add_member(request_data)
 
     # member = request.data
     # text_data = json.loads(member)
@@ -69,11 +65,17 @@ def add_member():
 
     # print({"family":jackson_family.get_all_members()})
     
-    return jsonify({"family":jackson_family.get_all_members()}), 200    
+    return jsonify({
+        "message":"Member created sucessfully",
+        "member":request_data
+    }), 200    
 
 
 @app.route('/members/<int:id>', methods=['DELETE'])
 def delete_member(id):
+    member=jackson_family.get_member(id)
+    if member is None:
+       raise APIException("invalid id", status_code=500) 
     jackson_family.delete_member(id)
     return jsonify({"family":jackson_family.get_all_members()}), 200    
 
