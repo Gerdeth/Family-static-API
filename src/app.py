@@ -6,6 +6,7 @@ from flask import Flask, request, jsonify, url_for
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from datastructures import FamilyStructure
+import json
 #from models import Person
 
 app = Flask(__name__)
@@ -14,6 +15,7 @@ CORS(app)
 
 # create the jackson family object
 jackson_family = FamilyStructure("Jackson")
+
 
 # Handle/serialize errors like a JSON object
 @app.errorhandler(APIException)
@@ -26,17 +28,56 @@ def sitemap():
     return generate_sitemap(app)
 
 @app.route('/members', methods=['GET'])
-def handle_hello():
-
+def get_all_members():
     # this is how you can use the Family datastructure by calling its methods
-    members = jackson_family.get_all_members()
-    response_body = {
-        "hello": "world",
-        "family": members
-    }
+
+    # members = jackson_family.get_all_members()
+    # response_body = {
+    #     "family": members
+    # }
+    # return jsonify(response_body), 200
+    response = jackson_family.get_all_members()
+    if  response is None or len(response) < 1: 
+      raise APIException("Record is not found", status_code=500)
+
+    return jsonify({"family": jackson_family.get_all_members()}), 200
 
 
-    return jsonify(response_body), 200
+@app.route('/members/<int:id>', methods=['GET'])
+def get_member(id):
+
+    response = jackson_family.get_all_members()
+    for member in response:
+     if id == member["id"]:
+      raise APIException("Bad request", status_code=400)
+
+    if  response is None or len(response) < 1: 
+      raise APIException("Record is not found", status_code=500)
+    
+    return jsonify({"family": jackson_family.get_member(id)}), 200    
+
+ 
+
+@app.route('/members', methods=['POST'])
+def add_member():
+
+    jackson_family.add_member(request.get_json())
+
+    # member = request.data
+    # text_data = json.loads(member)
+    # jackson_family.add_member(text_data)
+
+    # print({"family":jackson_family.get_all_members()})
+    
+    return jsonify({"family":jackson_family.get_all_members()}), 200    
+
+
+@app.route('/members/<int:id>', methods=['DELETE'])
+def delete_member(id):
+    jackson_family.delete_member(id)
+    return jsonify({"family":jackson_family.get_all_members()}), 200    
+
+
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':

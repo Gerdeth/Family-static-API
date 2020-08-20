@@ -14,6 +14,10 @@ class FamilyStructure:
 
         # example list of members
         self._members = []
+        # [{ "id": 0,"first_name": "John" ,  "last_name": last_name , "age": 33, "Lucky Numbers": [7, 13, 22] },
+        #                  { "id": 1,"first_name": "Jane" ,  "last_name": last_name , "age": 35, "Lucky Numbers": [10, 14, 3] },
+        #                  { "id": 2,"first_name": "Jimmy" ,  "last_name": last_name, "age": 5, "Lucky Numbers": [1] }] 
+
 
     # read-only: Use this method to generate random members ID's when adding members into the list
     def _generateId(self):
